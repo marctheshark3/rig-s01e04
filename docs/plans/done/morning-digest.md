@@ -1,6 +1,6 @@
 ---
 plan: morning-digest
-status: ready
+status: done
 owner: rook
 opened: 2026-10-29
 ---
@@ -78,3 +78,19 @@ page again with `LANE_MARKER` unset (the banner reads "no marker set") and uploa
 link. Move this plan to `docs/plans/done/` with its issue list.
 
 Done when: the preview link no longer shows the lane marker.
+
+## Completion record
+
+The reviewer has seen the preview. With owner approval, the page was saved with
+`LANE_MARKER` unset and verified after replacement at the same public link.
+
+## Issues
+
+- [#1 — Define the digest data contract](https://github.com/marctheshark3/rig-s01e04/issues/1)
+- [#2 — Read and aggregate a night's run log](https://github.com/marctheshark3/rig-s01e04/issues/2)
+- [#3 — Render GET /digest/:night](https://github.com/marctheshark3/rig-s01e04/issues/3)
+- [#4 — Serve GET /api/digest/:night](https://github.com/marctheshark3/rig-s01e04/issues/4)
+- [#5 — Link board nights to their digests](https://github.com/marctheshark3/rig-s01e04/issues/5)
+- [#6 — Test the digest page and API routes](https://github.com/marctheshark3/rig-s01e04/issues/6)
+- [#7 — Publish the digest copy for review](https://github.com/marctheshark3/rig-s01e04/issues/7)
+- [#8 — Remove the preview marker and archive the plan](https://github.com/marctheshark3/rig-s01e04/issues/8)
