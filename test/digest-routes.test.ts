@@ -25,12 +25,20 @@ function app() {
 function htmlRows(html: string): Array<{ cells: string[]; warned: boolean }> {
   return [...html.matchAll(/<tr\b([^>]*)>(.*?)<\/tr>/gs)]
     .map(([, attributes, body]) => ({
-      cells: [...body.matchAll(/<td\b[^>]*>(.*?)<\/td>/gs)].map(([, cell]) =>
+      cells: [...body.matchAll(/<(?:th|td)\b[^>]*>(.*?)<\/(?:th|td)>/gs)].map(([, cell]) =>
         cell.replace(/<[^>]+>/g, '').replace(/&mdash;/g, '—').trim(),
       ),
       warned: /\bwarn\b/.test(`${attributes} ${body}`),
+      rowHeader: /<th\b[^>]*scope="row"/.test(body),
     }))
-    .filter(({ cells }) => cells.length > 0);
+    .filter(({ rowHeader }) => rowHeader)
+    .map(({ cells, warned }) => ({ cells, warned }));
+}
+
+function statusItems(html: string): Array<{ href: string; night: string; content: string }> {
+  return [...html.matchAll(/<li>\s*<a href="([^"]+)">([^<]+)<\/a>\s*([^<]*)<\/li>/gs)].map(
+    ([, href, night, content]) => ({ href, night, content: content.trim() }),
+  );
 }
 
 const expectedRows: DigestRow[] = [
@@ -117,6 +125,7 @@ describe('digest routes', () => {
       badLines: 2,
       counts: { ok: 2, retry: 5, fail: 2 },
     });
+    expect(html).toContain('4 jobs · 2 ok · 5 retries · 2 failures · 2 bad lines');
 
     const rows = htmlRows(html);
     expect(rows.map(({ cells }) => cells)).toEqual([
@@ -156,6 +165,8 @@ describe('digest routes', () => {
       badLines: 0,
       counts: { ok: 0, retry: 0, fail: 0 },
     });
+    expect(html).toContain('0 jobs · 0 ok · 0 retries · 0 failures · 0 bad lines');
+    expect(html).toContain('nothing ran');
     expect(htmlRows(html)).toEqual([]);
   });
 
@@ -177,19 +188,35 @@ describe('digest routes', () => {
       badLines: 2,
       counts: { ok: 0, retry: 0, fail: 0 },
     });
+    expect(html).toContain('0 jobs · 0 ok · 0 retries · 0 failures · 2 bad lines');
+    expect(html).toContain('nothing ran');
     expect(htmlRows(html)).toEqual([]);
+  });
+
+  it('returns 404 for invalid night names in both formats', async () => {
+    const [html, json] = await Promise.all([
+      app().request('/digest/not-a-night'),
+      app().request('/api/digest/not-a-night'),
+    ]);
+
+    expect(html.status).toBe(404);
+    expect(json.status).toBe(404);
   });
 });
 
 describe('status board digest links', () => {
   it('links both supplied nights and shows their event counts', async () => {
     const response = await createApp(baseConfig).request('/');
-    const html = (await response.text()).replace(/\s+/g, ' ');
+    const html = await response.text();
 
     expect(response.status).toBe(200);
-    expect(html).toContain('href="/digest/2026-10-28"');
-    expect(html).toContain('href="/digest/2026-10-27"');
-    expect(html).toMatch(/10 ok \/ 4 retry \/ 1 fail/);
-    expect(html).toMatch(/7 ok \/ 0 retry \/ 0 fail/);
+    const items = statusItems(html);
+    expect(items).toEqual([
+      { href: '/digest/2026-10-28', night: '2026-10-28', content: '10 ok / 4 retry / 1 fail' },
+      { href: '/digest/2026-10-27', night: '2026-10-27', content: '7 ok / 0 retry / 0 fail' },
+    ]);
+
+    const digestResponses = await Promise.all(items.map(({ href }) => createApp(baseConfig).request(href)));
+    expect(digestResponses.map(({ status }) => status)).toEqual([200, 200]);
   });
 });
