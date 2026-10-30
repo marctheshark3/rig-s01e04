@@ -30,6 +30,18 @@ Read first: `docs/vision.md`, `docs/styleguide.md`. Decisions: `docs/adr/`.
 5. An issue is closed only when its "Done when" holds. If it can't hold yet, leave it open and
    say what it waits on.
 
+## Issue body contract
+
+The human approved this shape for the morning-digest split. Every issue carries:
+
+- A first line, `Source: plan.md § <section>`, and the label `plan:<plan name>`.
+- Scope, checkable "Done when" conditions, explicit blockers (or none), and validation.
+- Real issue numbers in blockers, with start dependencies distinguished from completion gates.
+
+Show the exact issue bodies, including validation, for human review before publishing a split.
+Keep the closing comment above even when a commit has already closed the issue; post it with
+`gh issue comment` in that case.
+
 ## Skills
 
 Shared skills live in `.agents/skills/`, one folder each, `SKILL.md` inside. That folder is the
