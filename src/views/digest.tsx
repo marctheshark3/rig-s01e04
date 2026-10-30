@@ -7,8 +7,10 @@ export function DigestPage({ digest }: { digest: NightDigest }) {
     <>
       <h1>digest · {digest.night}</h1>
       <p class="mute">
-        {digest.rows.length} jobs · {digest.counts.ok} ok · {digest.counts.retry} retries ·{' '}
-        {digest.counts.fail} failures · {digest.badLines} bad line{digest.badLines === 1 ? '' : 's'}
+        {digest.rows.length} {digest.rows.length === 1 ? 'job' : 'jobs'} · {digest.counts.ok} ok ·{' '}
+        {digest.counts.retry} {digest.counts.retry === 1 ? 'retry' : 'retries'} ·{' '}
+        {digest.counts.fail} {digest.counts.fail === 1 ? 'failure' : 'failures'} ·{' '}
+        {digest.badLines} bad line{digest.badLines === 1 ? '' : 's'}
       </p>
       {digest.rows.length === 0 ? (
         <p>nothing ran</p>
